@@ -1,0 +1,12 @@
+p {
+    font-size: 28px;
+    text-align: center;
+    font-family: Calibri;
+    color: black;
+    text-transform: uppercase;
+}
+
+canvas {
+    border-radius: 5px;
+    text-align: center;
+}
