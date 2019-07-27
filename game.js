@@ -10,7 +10,7 @@ let blockWidth = 30;
 let blockY = (canvas.height-blockHeight);
 let blockX = canvas.width/2;
 let dy = 2;
-let dx = 3;
+let dx = 2;
 let played = false;
 // let upKeyPressed = false;
 let upPressed = false;
@@ -18,7 +18,14 @@ let upPressed = false;
 let rightPressed = false;
 let leftPressed = false;
 let a = 0;
+let b = 0;
+let c = 1;
 let counter = 0;
+
+let brickX = 200;
+let brickY = 240;
+let brickHeight = 20;
+let brickWidth = 80;
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -75,11 +82,39 @@ function drawBlock() {
     ctx.closePath();
 }
 
+const drawBricks = () => {
+    ctx.beginPath();
+    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+    ctx.fillStyle = "#0095DD";
+    ctx.fill();
+    ctx.closePath();
+}
+
+
+const collisionDetection = () => {
+    if(blockY <= brickY+ blockHeight-5) {
+        if(blockX > brickX-blockWidth && blockX <= brickX+brickWidth) {         
+            c = 0;
+            blockY += (1/3) * 4 * (a**2);
+        } 
+        // else if(blockY !== (canvas.height-blockHeight)) {
+        //     blockY = brickY-blockHeight;                    
+        // }
+    } 
+    // else if(blockY < brickY - brickHeight) { 
+    //             if(blockY >brickY + brickHeight) {
+    //                 blockY = brickY-blockHeight; 
+    //             }
+    //         }
+}
+
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBlock();
         hiddenMessage();
         hiddenMessage2();
+        drawBricks();
+        collisionDetection();
         if(rightPressed) {
             blockX += dx;
         }         
@@ -88,12 +123,12 @@ function drawBlock() {
         }
         
         if(upPressed) {
-            a += 0.14
+            a += 0.14;
             if(!played){
                 jumpSound.play();
                 played = true;
             }
-            blockY -= 5.5*a - (1/3 * 4 * a**2);            
+            blockY -= 5.5*a*c - (1/3 * 4 * a**2);            
             if(blockY > (canvas.height-blockHeight)) {
                 counter++;
                 if(counter === 3) {
@@ -106,6 +141,7 @@ function drawBlock() {
                 a = 0;
                 blockColor = getRandomColor();
                 played = 0;
+                c = 1;
             }
         }
     }
