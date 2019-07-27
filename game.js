@@ -1,6 +1,8 @@
 let canvas = document.getElementById("myCanvas");
 let ctx = canvas.getContext("2d");
 canvas.style.background = "black";
+
+
 let hiddenMessageColor = "black";
 let hiddenMessage2Color = "black"
 let jumpSound = new Audio("jump.mp3");
@@ -12,20 +14,23 @@ let blockX = canvas.width/2;
 let dy = 2;
 let dx = 2;
 let played = false;
-// let upKeyPressed = false;
+let fall = false;
+
+
 let upPressed = false;
-// let downPressed = false;
 let rightPressed = false;
 let leftPressed = false;
 let a = 0;
 let b = 0;
 let c = 1;
 let counter = 0;
+let jumpDif = 0;
 
 let brickX = 200;
 let brickY = 240;
 let brickHeight = 20;
 let brickWidth = 80;
+let brickColor = "#0095DD";
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -85,66 +90,77 @@ function drawBlock() {
 const drawBricks = () => {
     ctx.beginPath();
     ctx.rect(brickX, brickY, brickWidth, brickHeight);
-    ctx.fillStyle = "#0095DD";
+    ctx.fillStyle = brickColor;
     ctx.fill();
     ctx.closePath();
 }
 
+const reset = () => {
+    upPressed = false;
+    fall = false;
+    a = 0;
+    blockColor = getRandomColor();
+    played = 0;
+    c = 1;
+}
 
 const collisionDetection = () => {
     if(blockY <= brickY+ blockHeight-5) {
-        if(blockX > brickX-blockWidth && blockX <= brickX+brickWidth) {         
-            c = 0;
-            blockY += (1/3) * 4 * (a**2);
+        if(blockX > brickX-blockWidth && blockX <= brickX+brickWidth) {    
+            if(brickY <= blockY) {    
+                c = 0;
+                brickColor = getRandomColor();
+            }
+            else if(blockY + blockHeight >= brickY) {
+                jumpDif = canvas.height -brickY;
+                brickColor = getRandomColor();
+            }
         } 
-        // else if(blockY !== (canvas.height-blockHeight)) {
-        //     blockY = brickY-blockHeight;                    
-        // }
-    } 
-    // else if(blockY < brickY - brickHeight) { 
-    //             if(blockY >brickY + brickHeight) {
-    //                 blockY = brickY-blockHeight; 
-    //             }
-    //         }
-}
-
-    function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBlock();
-        hiddenMessage();
-        hiddenMessage2();
-        drawBricks();
-        collisionDetection();
-        if(rightPressed) {
-            blockX += dx;
-        }         
-        else if(leftPressed) {
-            blockX -= dx;
-        }
-        
-        if(upPressed) {
-            a += 0.14;
-            if(!played){
-                jumpSound.play();
-                played = true;
-            }
-            blockY -= 5.5*a*c - (1/3 * 4 * a**2);            
-            if(blockY > (canvas.height-blockHeight)) {
-                counter++;
-                if(counter === 3) {
-                    hiddenMessageColor = "red";
-                }else if(counter === 7) {
-                    hiddenMessage2Color = "orange"
-                }
-                blockY = canvas.height-blockHeight;
-                upPressed = false;
-                a = 0;
-                blockColor = getRandomColor();
-                played = 0;
-                c = 1;
-            }
+        else if(jumpDif !== 0 ) {
+            if(a === 0) {
+                jumpDif = 0;
+                fall = true;
+                c = 0;
+                played = 1;
+            } else {
+                jumpDif = 0;
+            }            
         }
     }
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBlock();
+    hiddenMessage();
+    hiddenMessage2();
+    drawBricks();
+    collisionDetection();
+    if(rightPressed) {
+        blockX += dx;
+    }         
+    else if(leftPressed) {
+        blockX -= dx;
+    }        
+    if(upPressed || fall) {
+        a += 0.14;
+        if(!played){
+            jumpSound.play();
+            played = true;
+        }
+        blockY -= 5.5*a*c - (1/3 * 4 * a**2);            
+        if(blockY > (canvas.height-blockHeight-jumpDif)) {
+            counter++;
+            if(counter === 3) {
+                hiddenMessageColor = "red";
+            }else if(counter === 7) {
+                hiddenMessage2Color = "orange"
+            }
+            blockY = canvas.height-blockHeight-jumpDif;
+            reset();
+        }
+    }
+}
 
 let interval = setInterval(draw, 10);
 
